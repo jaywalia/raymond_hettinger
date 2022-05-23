@@ -221,3 +221,79 @@ dq_names = deque(names)
 del dq_names[0]
 dq_names.popleft()
 dq_names.appendleft('mark')
+
+#-------------------------------------------------------
+# Decorators 
+# use decorators to factor out administrative code
+import urllib
+def web_lookup(url, saved={}):
+    if url in saved:
+        return saved[url]
+
+    page = urllib.urlopen(url).read()
+    saved[url] = page
+    return page
+
+from functools import cache, lru_cache
+@cache
+def web_lookup2(url):
+    return urllib.urlopen(url).read()
+
+#python3 uses lru cache
+#LRU cache
+@lru_cache(maxsize=None)
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n-1) + fib(n-2)
+
+f16 = [fib(n) for n in range(16)]
+# [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610]
+print(f16)
+
+print(fib.cache_info())
+# CacheInfo(hits=28, misses=16, maxsize=None, currsize=16)
+
+#-------------------------------------------------------
+# factor out temporary contexts
+
+# old_cntxt = getcontext().copy()
+# getcontext().prec = 50
+# print(Decimal(355)/Decimal(113))
+# setcontext(old_cntxt)
+
+# #INSTEAD use
+
+# with localcontext(Context(prec=50)):
+#     print(Decimal(355)/Decimal(113))
+
+#-------------------------------------------------------
+# open close files
+
+#old method
+f = open('001.py')
+try:
+    data = f.read()
+finally:
+    f.close()
+
+#NEW METHOD
+with open('001.py') as f:
+    data = f.read()
+
+#-------------------------------------------------------
+# lock how to use locks
+
+lock = threading.Lock()
+lock.acquire()
+try:
+    print('critical section')
+finally:
+    lock.release()
+
+
+# BETTER way
+with lock:
+    print('critical section')
+
+#-------------------------------------------------------
